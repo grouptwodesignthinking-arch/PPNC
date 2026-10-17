@@ -82,3 +82,9 @@ test('meal picks match party size; sharing never picks a meal for one',()=>{E.po
 test('snack picks exclude drinks and respect High and stale stock',()=>{E.posPicks(P({basket:[],posLines:[],orderType:'snack'})).forEach(x=>assert.notEqual(x.category,'drink'));E.posPicks(P({basket:[],posLines:[],orderType:'snack',age:135,highSeconds:120})).forEach(x=>assert(x.service<=1));assert.equal(E.posPicks(P({basket:[],posLines:[],stockStale:true})).length,0);});
 test('combos are orderable at the counter and fill their included categories',()=>{const c=E.posCatalog.find(x=>x.id==='classic');assert(c);assert.deepEqual(c.categories,['main','drink']);assert.equal(E.quotePOS(P({posLines:[{id:'classic',qty:1}]})).total,139000);});
 console.log(`v1.14: ${n} scenarios passed including counter intent and starting picks.`);}
+
+// v1.16 counter variants.
+{const P=o=>S({channel:'pos',...o});
+test('counter items carry variant groups: chicken items flavor, Drink Pair drink, combos both',()=>{const g=id=>E.posCatalog.find(x=>x.id===id).variantGroups;assert.deepEqual(g('riceMain'),['chicken']);assert.deepEqual(g('drink'),['drink']);assert.deepEqual(g('classic'),['chicken','drink']);assert.equal(g('fries'),undefined);});
+test('quote rejects an unavailable line variant but keeps price neutral',()=>{const base={posLines:[{id:'classic',qty:1,variant:{chicken:'Spicy',drink:'7UP'}}]};assert.equal(E.quotePOS(P(base)).total,139000);assert.equal(E.quotePOS(P(base)).valid,true);assert.equal(E.quotePOS(P({...base,unavailableVariants:['Spicy']})).valid,false);});
+console.log(`v1.16: ${n} scenarios passed including counter variants.`);}

@@ -2,6 +2,11 @@
 
 Policy that applies now is summarized at the top of `dist/validation.md` ("Current policy"). Detailed per-version QA notes are in `qa/QA-SUMMARY.md`.
 
+## v1.16 — 17 October 2026
+- Staff POS: every basket line with chicken gets **Original / Spicy** chips; combos and Drink Pair get **Pepsi / 7UP / Mirinda**. The menu adds the default (first available) choice; staff change it per line, so one order can mix Spicy and Original; identical lines merge.
+- The accepted Drink Pair extra takes a drink choice too. Choices are price-neutral, shown on the customer display, written on the kitchen ticket and mapped to the Spicy marinade ingredient.
+- If a chosen flavor or drink becomes unavailable, the line switches to an available option with a notice for staff to confirm with the customer; unavailable chips are disabled; the quote is invalid while a line holds an unavailable choice.
+
 ## v1.15.1 — 17 October 2026
 - Live demo feed brings a scheduled delivery on its first tick, so a counter order placed right after a kiosk order still gets its kitchen-aware extra.
 - `docs/demo-intro-script.md`: 3-minute walkthrough of Kiosk → Staff POS → Kitchen Board.

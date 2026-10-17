@@ -1,6 +1,6 @@
 # ComboFlow — Validation Kit
 
-Version 1.14 · 17 October 2026 · English-only prototype · visual choices, editable counter and Kitchen Board
+Version 1.16 · 17 October 2026 · English-only prototype · visual choices, editable counter and Kitchen Board
 
 ## Current policy (v1.14) — read this first
 
@@ -547,3 +547,15 @@ Engineering QA only (logic suites and browser flow checks with synthetic fixture
 | S01 | Open Kitchen status from POS and Kitchen Board | Same panel; Load Gate previews change the band for both |
 | S02 | Live demo running 3 s | Demo clock +30 s, trend extended, signal age 0 |
 | S03 | Pause / simulate signal loss | Clock stops / Safe fallback, no workload ranking |
+
+## 24. Counter flavor and drink choices (v1.16)
+- Staff POS basket lines show **Chicken: Original / Spicy** for chicken items (Chicken Rice, Chicken Burger, Crispy Chicken and chicken combos) and **Drink: Pepsi / 7UP / Mirinda** for combos with drinks and the Drink Pair. Tapping a menu item adds the first available choice; staff change it on the line. Lines with the same item and choices merge, so a basket can hold, for example, one Spicy and one Original combo.
+- An accepted Drink Pair extra also shows drink chips. Choices are price-neutral and appear on the customer display ("Spicy chicken · Mirinda"), in the confirmation snapshot and on the kitchen ticket; Spicy reserves and later deducts one Spicy marinade portion per chicken piece.
+- Scenario lab Spicy / Mirinda availability applies to the counter: unavailable chips are disabled; an existing line switches to an available choice with a staff notice; the basket cannot be confirmed while a line holds an unavailable choice.
+
+| ID | Setup / action | Expected outcome |
+|---|---|---|
+| P18 | Add Crispy Chicken Combo → Spicy + Mirinda | Line and customer display show Spicy chicken · Mirinda; price unchanged |
+| P19 | Add a second combo from the menu, then set it to Spicy + Mirinda | Two lines, then one merged line of quantity 2 |
+| P20 | Mirinda becomes unavailable | Line switches to Pepsi with a notice; Mirinda chip disabled |
+| P21 | Confirm | Ticket label lists the choices; marinade reserved for Spicy pieces |
