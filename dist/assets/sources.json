@@ -1,0 +1,20 @@
+{
+  "accessed": "2026-10-15",
+  "source_page": "https://kfcvietnam.com.vn/",
+  "assets": {
+    "kfc-logo.svg": "https://kfcvn-static.cognizantorderserv.com/images/web/kfc-logo.svg?v=5.0",
+    "chicken-combo.jpg": "https://static.kfcvietnam.com.vn/images/items/lg/D-CHICKEN-2.jpg?v=4l8kj4",
+    "rice-combo.jpg": "https://static.kfcvietnam.com.vn/images/items/lg/EC.CBO-RICE-COB.jpg?v=4l8kj4",
+    "burger-combo.jpg": "https://static.kfcvietnam.com.vn/images/items/lg/D-B.ZINGER-FF.jpg?v=4l8kj4",
+    "pasta-combo.jpg": "https://static.kfcvietnam.com.vn/images/items/lg/EC.CBO-1COB-Pasta.jpg?v=4l8kj4",
+    "solo-combo.jpg": "https://static.kfcvietnam.com.vn/images/items/lg/D-CHICKEN-1.jpg?v=4l8kj4",
+    "group-combo.jpg": "https://static.kfcvietnam.com.vn/images/category/lg/COMBO%20NHOM.jpg?v=4l8kj4",
+    "sides.jpg": "https://static.kfcvietnam.com.vn/images/category/lg/MON%20AN%20NHE.jpg?v=4l8kj4",
+    "drinks.jpg": "https://static.kfcvietnam.com.vn/images/category/lg/TRANG%20MIENG.jpg?v=4l8kj4",
+    "Oswald.ttf": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/Oswald%5Bwght%5D.ttf",
+    "Roboto.ttf": "https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/Roboto%5Bwdth,wght%5D.ttf",
+    "Oswald-OFL.txt": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/OFL.txt",
+    "Roboto-OFL.txt": "https://raw.githubusercontent.com/google/fonts/main/ofl/roboto/OFL.txt"
+  },
+  "banner_note": "English HTML copy with group-combo.jpg. The previous Vietnamese promotional banner is not included in this release."
+}

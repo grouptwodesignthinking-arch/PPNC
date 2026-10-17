@@ -1,0 +1,70 @@
+{
+  "reference_page": "https://kfcvietnam.com.vn/en/menu/hot-deal",
+  "assets": [
+    {
+      "file": "shrimp-combo.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/EC.CBO-B.Shrimp.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "bucket.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/D.BUCKET4_FF.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "pasta-share.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/EC.CBO-2-Pasta-COB.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "rice-main.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/Rice-OR.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "salad.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/SALAD-XOT-ME-RANG.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "cheese.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/4-Chewy-Cheese.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "popcorn.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/POP-R.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "fries.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/FF-L.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "potato.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/MP-(R)-new.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "tart.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/EGGTART-1.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "pepsi.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/PEPSI-M.jpg?v=gVemJ4",
+      "use": "Official reference photo only; prototype portions and prices are illustrative."
+    },
+    {
+      "file": "chicken-main.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/1-Fried-Chicken.jpg?v=gVemJ4",
+      "use": "Official reference photo; illustrative prototype price."
+    },
+    {
+      "file": "burger-main.jpg",
+      "source": "https://static.kfcvietnam.com.vn/images/items/lg/Burger-Zinger.jpg?v=gVemJ4",
+      "use": "Official reference photo; illustrative prototype price."
+    }
+  ]
+}

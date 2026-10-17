@@ -1,0 +1,47 @@
+PASS default kiosk eligible + minimum Fit + cap
+PASS three distinct synthetic cards
+PASS expired offer removed
+PASS unavailable selection removed
+PASS Elevated snapshot changes rank within fit
+PASS High blocks normal/constrained recommendations
+PASS 89/90 boundary
+PASS High persistence required
+PASS High exit hysteresis
+PASS freshness boundary and no fastest fallback
+PASS ranking outage fallback retains order path
+PASS B fixed order regardless of context ranking
+PASS hard budget never exceeded
+PASS empty fit set is empty
+PASS party 4 alternatives respect party and budget
+PASS soft budget permits higher priced valid option
+PASS POS recommends one missing compatible category
+PASS POS missing stock chooses next eligible
+PASS POS existing category never repeated
+PASS POS complete basket no recommendation
+PASS High no serviceable POS => no recommendation
+PASS stale stock no speculative availability
+PASS manager suppress and safe override
+PASS manager never bypasses expired or stock
+24 scenario tests + 864 invariant combinations passed. Engineering QA only; no user validation.
+PASS budget brackets scale by party, strict lower ceiling and open upper
+PASS kiosk Normal side → Elevated salad → High salad
+PASS kiosk B retains fixed order except shared High gate
+PASS side + main must fit total budget
+PASS open upper budget permits valid side without spending floor
+PASS kiosk fallback and manager suppress no speculative side
+PASS kiosk High no short addon => none
+PASS kiosk already has side category: no duplicate side
+PASS expired dessert removed, non-promo alternative remains
+PASS stock stale or main unavailable blocks all upsell
+TOTAL: 34 scenario tests + 864 meal/POS combinations + 540 upsell combinations passed.
+PASS expanded options never escape Fit gate
+PASS empty POS does not upsell
+PASS counter quote follows quantities and explicit offer consent
+PASS promotion threshold is inclusive, needs side, and unavailable items invalidate
+PASS accepted upsell included once in counter total and discount
+FINAL: 39 scenarios, 864 meal/POS invariant combinations, 540 upsell invariant combinations passed.
+PASS counter preference changes with kitchen band after drinks
+All 40 scenarios passed.
+PASS kitchen median covers all open tickets and excludes ready
+PASS new zero-age kitchen ticket changes median without a capacity claim
+FINAL v1.6: 42 scenarios, 864 meal/POS combinations and 540 upsell combinations passed. Engineering QA only.
