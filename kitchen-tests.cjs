@@ -62,7 +62,8 @@ console.log(`${count} total kitchen and connected POS checks passed.`);
  assert(run({},480).w.history.filter(h=>h.age>=120).length<40,'steady arrivals stay mostly below High');
  const human={id:'H1',age:0,status:'queued',channel:'Kiosk',label:'demo',lines:[{id:'solo',qty:1}],fixture:false};
  const r=run({},40,[human]);const h=r.tk.find(t=>t.id==='H1');assert.equal(h.status,'queued','confirmed demo orders wait for a human Start');assert.equal(h.age,600);
- const one={id:'B1',age:0,status:'queued',lines:[{id:'solo',qty:1}],fixture:true},s0={...K.stockDefaults()};const s1=K.liveStep(K.liveWorld({arrivalRate:0,deliveryEvery:1e9}),[one],s0);assert.equal(s1.tickets[0].status,'preparing');assert.equal(s1.stock.chicken,s0.chicken-1);const s2=K.liveStep(s1.world,s1.tickets,s1.stock);assert.equal(s2.stock.chicken,s1.stock.chicken,'no second deduction while preparing');
+ const one={id:'B1',age:0,status:'queued',lines:[{id:'solo',qty:1}],fixture:true},s0={...K.stockDefaults()};const s1=K.liveStep(K.liveWorld({arrivalRate:0,deliveryEvery:1e9,deliverOnStart:false}),[one],s0);assert.equal(s1.tickets[0].status,'preparing');assert.equal(s1.stock.chicken,s0.chicken-1);const s2=K.liveStep(s1.world,s1.tickets,s1.stock);assert.equal(s2.stock.chicken,s1.stock.chicken,'no second deduction while preparing');
  const seeded=K.seedHistory(K.liveWorld());assert.equal(seeded.history.length,240);assert.equal(seeded.clock,0);assert.equal(seeded.seq,200);
  console.log('PASS live demo feed is deterministic, bounded, human orders stay manual, single deduction');
 }
+{const w=K.liveWorld({arrivalRate:0}),r=K.liveStep(w,[],{...K.stockDefaults(),chicken:1});assert.equal(r.stock.chicken,12);assert(r.events.some(e=>e.type==='delivery'));const r2=K.liveStep(r.world,[],{...r.stock,chicken:1});assert.equal(r2.stock.chicken,1,'only the first tick delivers early');console.log('PASS live feed opens with a scheduled delivery');}
