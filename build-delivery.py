@@ -45,4 +45,5 @@ with zipfile.ZipFile(root.parent/'ComboFlow-prototype.zip','w',zipfile.ZIP_DEFLA
 print('Built documentation, single-file offline prototype and ZIP.')
 
 with zipfile.ZipFile(root.parent/'ComboFlow-prototype.zip','a',zipfile.ZIP_DEFLATED) as z:
+ z.writestr('ComboFlow/source-checks/flow-tests.cjs',(root/'flow-tests.cjs').read_text().replace("path.join(__dirname, 'dist')","path.join(__dirname, '..')"))
  z.writestr('ComboFlow/source-checks/kitchen-tests.cjs',(root/'kitchen-tests.cjs').read_text().replace('./dist/kitchen.js','../kitchen.js').replace('./dist/engine.js','../engine.js'))

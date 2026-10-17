@@ -123,3 +123,10 @@ Engineering checks only; no participant or live-kitchen validation.
 - Kitchen at 1366×768: all three panels had 553px content/client height; Ready to pair was fully visible and all 11 ingredients remained available. Shared-prep and status controls retained human action.
 - Mobile customization at 390×844: five variant controls, one optional extra, no horizontal overflow. Old menu and engine behavior remain covered by existing regression checks.
 - Engineering checks with synthetic fixtures only. No real KFC menu/discount/holding-time claim, no learned prediction or participant results.
+
+## v1.13 — continuous counter basket, variant mapping, ready-item governance
+- Logic suite: 50 scenarios plus the unchanged meal/POS and upsell invariant matrices passed, including variant availability, default selection, invalid/unavailable choice rejection and price neutrality.
+- Kitchen suite: 18 checks and 90 planner combinations plus v1.12 ready checks and new v1.13 checks passed: Spicy marinade mapping, single deduction at start, short-marinade block, hold-window exclusion from ready-first ranking.
+- Browser flow suite (`flow-tests.cjs`, Chromium via Playwright): 12 checks passed — kiosk guided flow with Spicy + Mirinda + Take away (VND 174,000, one ticket after repeated confirm, order number matches ticket); variant invalidation at review; POS ADD → keep editing → review → back → confirm with matching staff/customer totals; SKIP respected until reopened; review blocked while a suggestion is open; demo offer not re-applied silently; High removes open and accepted extras while orders continue; ready hold window and re-check; marinade deducted once; 390px no horizontal overflow; standalone file loads with no external requests.
+- Screens captured at 1366×768, 1600×1000 and 390×844 for kiosk entry/intent/options/customize/review/confirmation, POS (with and without accepted extra, workload details open), Kitchen Board and the ready-item dialog: no horizontal overflow, no console errors; Kitchen Board shows all 12 ingredient rows at 1366×768.
+- Synthetic fixtures only. No KFC recipe, holding-time, menu, discount or participant result claimed.

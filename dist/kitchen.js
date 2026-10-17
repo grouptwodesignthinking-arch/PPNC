@@ -5,8 +5,10 @@ const recipes={classic:{chicken:2,rice:2,drink:2},ready:{chicken:2,rice:2,drink:
 // Recipe fixtures describe planning units, not verified recipes. Distinct ingredients avoid false substitutions.
 Object.assign(recipes,{promo:{chicken:2,pasta:2,drink:2},pasta2:{chicken:2,pasta:2,drink:2},pasta1:{chicken:1,pasta:1,drink:1},shrimp2:{shrimp:2,bun:2,drink:2}});
 ingredients.push({id:'pasta',name:'Pasta',unit:'portions',start:6,image:'pasta-share.jpg'},{id:'shrimp',name:'Shrimp patties',unit:'patties',start:4,image:'shrimp-combo.jpg'});
+// v1.13 variant mapping: Spicy uses the same chicken pieces plus one marinade portion per piece. Drink flavors share cups. Simulated fixture.
+ingredients.push({id:'spicy',name:'Spicy marinade',unit:'portions',start:6,image:'chicken-main.jpg'});
 const stockDefaults=()=>Object.fromEntries(ingredients.map(i=>[i.id,i.start]));
-function needs(lines){const out={};for(const l of lines||[]){if(!recipes[l.id])return null;for(const [id,q]of Object.entries(recipes[l.id]))out[id]=(out[id]||0)+q*l.qty;}return out;}
+function needs(lines){const out={};for(const l of lines||[]){if(!recipes[l.id])return null;for(const [id,q]of Object.entries(recipes[l.id]))out[id]=(out[id]||0)+q*l.qty;if(l.variant?.chicken==='Spicy'&&recipes[l.id].chicken)out.spicy=(out.spicy||0)+recipes[l.id].chicken*l.qty;}return out;}
 function shortage(ticket,stock){const req=needs(ticket.lines);return req?Object.entries(req).filter(([k,q])=>q>(stock[k]||0)).map(([id,q])=>({id,qty:q-(stock[id]||0)})):[{id:'unknown',qty:1}];}
 function station(t){const n=needs(t.lines);return n?.bun?'Burger station':n?.rice||n?.pasta?'Rice & pasta':'Chicken & sides';}
 function consume(ticket,stock){if(ticket.status!=='queued'||shortage(ticket,stock).length)return null;const next={...stock};for(const [id,q]of Object.entries(needs(ticket.lines)))next[id]-=q;return next;}
@@ -35,5 +37,8 @@ function startBatch(tickets,stock,proposal,fresh=true){
  if(!fresh||!proposal)return null;const valid=batchSuggestions(tickets,stock,fresh).find(b=>b.key===proposal.key&&b.ids.join('|')===proposal.ids.join('|'));if(!valid)return null;
  let next={...stock};for(const id of valid.ids){next=consume(tickets.find(t=>t.id===id),next);if(!next)return null;}return {stock:next,ids:valid.ids,needs:valid.needs};
 }
-const api={ingredients,recipes,stockDefaults,needs,shortage,station,consume,plan,stations,workload,posAdvice,batchSuggestions,startBatch};root.KitchenPlanner=api;if(typeof module!=='undefined')module.exports=api;
+// Ready portions past the documented holding assumption need a staff re-check before ready-first ranking. [Assumption], not a food-safety rule.
+const HOLD_LIMIT_S=600;
+function rankableReady(ready,ages,limit=HOLD_LIMIT_S){return Object.fromEntries(Object.entries(ready||{}).map(([id,n])=>[id,(ages?.[id]||0)<=limit?n:0]));}
+const api={HOLD_LIMIT_S,rankableReady,ingredients,recipes,stockDefaults,needs,shortage,station,consume,plan,stations,workload,posAdvice,batchSuggestions,startBatch};root.KitchenPlanner=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -1,6 +1,17 @@
 # ComboFlow — Validation Kit
 
-Version 1.12 · 17 October 2026 · English-only prototype · visual choices, editable counter and Kitchen Board
+Version 1.13 · 17 October 2026 · English-only prototype · visual choices, editable counter and Kitchen Board
+
+## Current policy (v1.13) — read this first
+
+This kit keeps its version history. Where an earlier section conflicts with the list below, the list below and sections 21–22 apply. Rows marked **[Superseded]** are kept only for traceability.
+
+- Pipeline: Rules → Contextual Ranking → Load Gate → Human Decision. At most three combo suggestions plus one optional add-on per order; the full menu is a separate manual path.
+- **High suppresses every upsell** in kiosk and POS, including ready items and Rules-only branch B. Main-meal ordering continues when valid; kiosk main-meal recommendations at High remain limited to Ready / Short preparation classes.
+- Stale signal or ranking outage → Safe fallback: no workload or ready ranking, no Fastest to Serve; POS shows fixed valid rules with a staff check; kiosk extras pause. Stale is never read as an idle kitchen.
+- ADD / SKIP and review / confirm are always human actions. Nothing is added, discounted or confirmed silently. In POS, ADD and SKIP keep staff in the basket (section 22); review is a separate explicit step.
+- No margin, internal Fit score or kitchen utilization is shown. Business Value is omitted without contribution data.
+- Menu, prices, portions, variants, recipes and holding windows are synthetic **[Verify KFC VN menu]** / **[Assumption]**. No user-test, revenue, waste, payback, live-integration or prediction-accuracy result is claimed.
 
 **Simulated Contextual Ranking (pre-scripted decision table)**
 
@@ -17,7 +28,7 @@ Intentional terminology updates: the shared layer is **Contextual Ranking**; onl
 - Open `index.html` in a browser with its supporting files in the same folder. No installation or network connection is needed. `ComboFlow-standalone.html` is a self-contained offline file.
 - Customer Kiosk → Help me choose → party size, budget, priority → combined combo + side screen → choose combo + side or combo only → review → confirm.
 - I know what I want → full fixture menu with pairing panel → choose combo + side or combo only → review → confirm. This path bypasses intent-based ranking. The bounded fixture menu is not the complete verified KFC menu.
-- Staff POS → menu / editable basket / kitchen band / optional demo discount → one recommendation or No recommendation → ADD / SKIP / continue → review → confirm.
+- Staff POS → menu / editable basket / kitchen band / optional demo discount → one recommendation or No recommendation → ADD / SKIP (staff stay in the basket and may keep editing) → Review basket → confirm. The confirmation shows a demo order number that appears on the Kitchen Board.
 - Kitchen Board → inspect open tickets / median age → Start preparing → Mark ready → updated signal → inspect kiosk or counter suggestions. Confirmed demo orders appear as new tickets in the same browser session.
 - Scenario Lab is hidden by default. Open it with the top button to control simulated conditions; hide it for customer/staff close-ups.
 - A scenario preset starts a new run. Branch, load and checkbox controls change the current run. Reset between tasks. Export the session log before closing; it exists only in browser memory.
@@ -45,7 +56,7 @@ Prototype comparison: **C_sim vs B**. Future AI Gate: **C_AI vs H_live**. Protot
 | Contextual Ranking | Fit descending; within the same Fit, readiness; value priority uses lower price after readiness ties; deterministic fixture order resolves ties | B and Safe fallback bypass contextual sorting. No learned scores. |
 | Card roles | Best Fit = first eligible ranked item. Best Value = largest synthetic saving, available only with the synthetic-value toggle. Fastest = lowest synthetic service class among eligible items | Merge roles for the same item and preserve eligible order. Every candidate passes Rules and Load Gate. No wait prediction. |
 | Normal / Elevated | Kiosk: serviceability affects same-Fit order. POS: fresh, compatible, stock-feasible extras ranked by open station work (section 17); fixed fallback retains catalog order. | Elevated changes the synthetic snapshot: Classic share Short → Normal; Easy share Normal → Ready. The explicit item snapshot explains the ranking change; load band alone does not prove a real preparation change. |
-| High | Recommend only Ready now / Short additional prep | Suppress Normal / Constrained items. Direct manual menu remains a human ordering path, not a recommendation or automatic cancellation. |
+| High | Main meals: recommend only Ready now / Short additional prep. POS add-ons: none **[Superseded v1.12 §21 for add-ons]** | Suppress Normal / Constrained main meals; zero POS upsell. Direct manual menu remains a human ordering path, not a recommendation or automatic cancellation. |
 | Safe fallback | Signal older than 60 seconds, ranking outage or manager-forced safe mode | Fixed valid main-meal options. No Fastest / Best Value claims or kitchen-based sorting. |
 | Business Value | Contribution data unavailable | Omitted entirely. Never infer business contribution from price. Customer savings are distinct. |
 | Human Decision | CHOOSE / ADD / SKIP, followed by explicit confirmation | Revalidate on confirm. Invalidate an ineligible draft selection. Freeze the final order after confirmation. |
@@ -90,7 +101,7 @@ Changing party size recomputes the selected bracket. The ceiling applies to **ma
 | Rules + compatibility | Valid side / dessert category absent from the meal; total within the active ceiling; no expired or unavailable item | Candidate set without duplicate side categories |
 | Normal | Fixed preference order: popcorn, salad, dessert pair, fries, cheesy bites, potato, egg tart | Exactly one eligible suggestion, or No recommendation; no alternative add-on grid |
 | Elevated / C_sim | Shorter synthetic preparation class first | Sesame Salad precedes Normal-prep Popcorn Chicken |
-| High / all branches | Only Ready / Short candidates | Sesame Salad or No recommendation; no Normal / Constrained add-on |
+| High / all branches | **[Superseded v1.12 §21]** No add-on candidates | No recommendation; continue with the combo only |
 | B | Fixed eligible order; shared High restriction | No contextual sorting |
 | Safe fallback | Suppress optional kiosk upsell; retain Rules-only main-meal path | No recommendation → explicit continue → confirm |
 | Manager suppress | Pause kiosk upsell and POS suggestions | No recommendation; validity cannot be bypassed |
@@ -120,18 +131,18 @@ All included-category assignments, prices and preparation classes are synthetic 
 | K15 | Entry | Exactly two main paths; Help me choose visually dominant; no meal preselected |
 | K16 | Party 1 → 2 → 4, same bracket | Boundaries scale with party; selected bracket preserved |
 | K17 | Classic → upsell; Normal → Elevated | Popcorn Chicken at VND 35,000 changes to Sesame Salad at VND 39,000; no addition until ADD |
-| K18 | Ready meal → High | Short-prep salad only; unavailable salad → No recommendation |
+| K18 | Ready meal → High | **[Superseded v1.12 §21]** No recommendation; combo-only continuation |
 | K19 | One person, under VND 100,000, Solo at VND 69,000 | Only extras priced below VND 31,000 remain; total stays under VND 100,000 |
 | K20 | ADD salad, then stale kitchen | Draft side removed; explicit continuation confirms main alone |
 | K21 | Manual classic → ADD side → confirm | VND 174,000 total; both human actions logged |
 | K22 | Guided or manual → SKIP | Main retained; no side charge |
 | K23 | Group already includes side; promotion expired | No duplicate side or expired dessert |
-| P01 | Main-only POS basket, C_sim | One Drink Pair suggestion → ADD → review → confirm |
+| P01 | Main-only POS basket, C_sim | One kitchen-aware suggestion → ADD → keep editing or Review basket → confirm (v1.13 flow) |
 | P02 | Same basket → SKIP | Original basket confirmed |
 | P03 | Basket includes drinks | No duplicate drink; consider missing categories |
 | P04 | Main + drink + side + dessert | No recommendation; confirm original basket |
-| P05 | High, drink unavailable | Short-prep salad if available; never constrained dessert |
-| P06 | High, all Ready / Short add-ons unavailable | No recommendation; Normal / Constrained extras suppressed |
+| P05 | High, drink unavailable | **[Superseded v1.12 §21]** No recommendation; continue the order |
+| P06 | High, all Ready / Short add-ons unavailable | No recommendation (High already suppresses every add-on) |
 | P07 | ADD, then mark item unavailable | Remove draft add-on; require another decision |
 | P08 | B vs C_sim, main-only basket | B fixed eligible order vs C_sim queue-aware ranking; shared High restrictions |
 | M01 | Manager forces safe or suppress, reason supplied | Mode changes and reason logged; invalid items stay blocked |
@@ -250,7 +261,7 @@ Time advances only with **Advance demo 30s**. Ticket ages and signal age advance
 | KB02: Start preparing a queued ticket | Ticket moves columns; remains in median sample |
 | KB03: Mark a preparing ticket Ready | Open count falls; median recomputed; action logged |
 | KB04: Confirm kiosk or counter draft | New labelled demo ticket enters In queue with age 0s |
-| KB05: High → switch to counter | High signal retained; only Ready / Short extras suggested |
+| KB05: High → switch to counter | High signal retained; **[Superseded v1.12 §21]** no extras suggested |
 | KB06: Advance until signal age >60s | Safe fallback; no speed claim |
 | KB07: Refresh signal | Signal age 0s; load policy recalculated from retained queue/history |
 | KB08: Mark all open tickets Ready | Open count 0, median 0; any active recovery hold remains respected |
@@ -344,7 +355,7 @@ All rules below are synthetic prototype assumptions. No learned AI, measured cap
 |---|---|---|
 | POS Rules | Existing availability, promotion, missing-category compatibility; require a main. Fresh stock must cover all queued recipes, the current basket and the proposed extra. | Manual menu selection remains available; no automatic add. |
 | POS Contextual Ranking | Map recipe components to seven stations. Count queued and preparing recipe units separately, excluding Ready. Rank eligible extras by the largest open-unit count among their required stations, then fixture prep class, then price. These counts are not comparable processing times or utilization; this is a test heuristic only. | Show one suggestion and its station, open-unit count, incremental recipe units and stock check. |
-| Load Gate | Existing Median waiting-ticket age bands remain primary. High excludes long-prep extras. B retains fixed valid order; Safe fallback bypasses queue ranking. Stock-stale suppresses recommendations via Rules. | ADD / SKIP, then confirm order. Eligibility is checked again. |
+| Load Gate | Existing Median waiting-ticket age bands remain primary. High suppresses every extra (v1.12 §21). B retains fixed valid order; Safe fallback bypasses queue ranking. Stock-stale suppresses recommendations via Rules. | ADD / SKIP, then confirm order. Eligibility is checked again. |
 | Batch candidate | Among queued orders, take the first individually stock-feasible ticket in team-priority then oldest-first order. Combine up to three orders with the same chicken, shrimp, rice, pasta, fries, cheese or tart component, checking aggregate stock for ALL components as each ticket joins. Rank groups by ticket count then shared-component quantity. | Review tickets, ingredient requirements and recipe/equipment compatibility. |
 | Batch execution | Recompute the proposal and check freshness, queued status and stock. Commit all starts and deductions together, or none. Started/Ready tickets cannot be started again. Stale signal or stock-stale pauses suggestions. | Confirm & start group / Skip grouping. Each ticket remains separately marked Ready. |
 
@@ -454,3 +465,38 @@ Validation: compare both displays after every edit, distinguish accepted extras 
 - Stale signals disable workload/ready ranking; POS falls back to fixed valid rules and staff checks, while kiosk extras pause. High blocks upsell irrespective of ready counts.
 - Ready-to-pair panel, shared-prep review, ingredient ledger and status controls are parts of the same ComboFlow kitchen view. Manual controls are simulation inputs, not authority to override item validity or promotions.
 - Added validation scenarios: change chicken/drink and verify receipt/ticket; change POS basket and observe suggestion; raise a ready-item count; set High and assert zero upsell; return to Normal; stale signal disables ready ranking; repeated confirm cannot reserve twice.
+
+
+## 22. Continuous counter basket, variant mapping and ready-item governance (v1.13)
+
+### Staff POS: continue editing after ADD / SKIP
+- ADD places the one suggested extra in the draft basket and keeps staff on the order workspace. Quantities and menu items stay editable. The extra stays only while it remains valid: item validity, category compatibility, ingredient coverage for queued orders + basket + extra (fresh signal) and the Load Gate. High, an unavailable item, a duplicate category or a basket without a main removes it with a visible notice.
+- SKIP records the declined item. One optional extra per order: no new suggestion appears after ADD or SKIP. **Show suggestion again** is an explicit staff action at the customer's request; **Remove extra** counts as a SKIP.
+- **Review basket** is a separate step. When a suggestion is open, review requires an explicit ADD or SKIP first. **Back to basket** from review keeps the accepted extra.
+- The staff basket and parallel customer display update after every edit. The customer display shows a suggestion only while it is undecided and marks accepted extras.
+- The demo discount is removed whenever the basket stops qualifying and is never re-applied automatically; staff must tick it again.
+
+### Kiosk: simulated variant mapping
+- Variant groups follow the meal fixture: chicken flavor (Original / Spicy) for chicken meals, drink (Pepsi / 7UP / Mirinda) for meals with included drinks. Prices are neutral.
+- Availability is a scenario control (Scenario lab: Spicy / Mirinda unavailable). Unavailable options are disabled on the customization screen. If the chosen option becomes unavailable, the kiosk selects the first available option, shows a notice and returns review to customization; confirmation re-checks the choice. A meal with no available option in a required group is not offered.
+- Planning recipe: Spicy uses the same chicken pieces plus one **Spicy marinade** portion per piece (new ingredient row, start count 6). Drink flavors share cups. Start preparing deducts the marinade once with the rest of the recipe; a short marinade count blocks only Spicy tickets. Simulated mapping, not a KFC recipe.
+- Dine in / Take away is carried into review, confirmation and the kitchen ticket label. Each confirmed kiosk or counter order shows a demo order number matching its Kitchen Board ticket.
+
+### Ready-item governance
+- Each ready-item count carries a demo-clock "last checked" age that advances only with **Advance demo 30s**. Portions unchecked for more than **10 demo minutes** drop out of ready-first ranking (still within validity and stock rules) until staff **Mark checked** or **Discard** them. Discards are logged with count and age for later waste measurement.
+- The 10-minute window is an **[Assumption]** placeholder for the pilot, not a KFC holding-time or food-safety standard. Ready status never bypasses Fit, availability, the Load Gate or human ADD / SKIP.
+
+### Scenarios — expected outcomes
+| ID | Setup / action | Expected outcome |
+|---|---|---|
+| P09 | POS ADD, then +1 Chicken Rice | Extra kept; both screens show the same total; no second suggestion |
+| P10 | POS SKIP, then edit basket | No suggestion until Show suggestion again |
+| P11 | Suggestion open → Review basket | Blocked until ADD or SKIP |
+| P12 | Apply demo offer, remove the side, add it back | Offer removed with notice; not re-applied automatically |
+| P13 | ADD, then High | Extra removed; review and confirm continue without it |
+| K24 | Spicy + Mirinda + Take away → confirm | Review, confirmation and ticket show the choices; ticket needs 2 marinade portions |
+| K25 | Spicy chosen, then Spicy unavailable at review | Returned to customization with Original and a notice |
+| R01 | Advance demo past 10 min with ready potato | Potato no longer ranked as ready until Mark checked |
+| R02 | Confirm twice | One ticket; one ready-portion reservation; ingredients deducted once at Start |
+
+Engineering QA only (logic suites and browser flow checks with synthetic fixtures). No participant, staff, kitchen or food-safety validation is claimed.

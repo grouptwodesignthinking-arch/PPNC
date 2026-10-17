@@ -61,3 +61,11 @@ test('missing or invalid reference prices never invent savings',()=>{assert.equa
 console.log(`FINAL v1.11: ${n} scenarios plus meal/POS and upsell invariant matrices passed. Engineering QA only.`);
 
 test('High blocks every POS upsell even with ready items and fixed branch',()=>{for(const branch of ['B','C_sim'])assert.equal(E.decide(S({channel:'pos',branch,age:135,highSeconds:120})).cards.length,0);});
+
+// v1.13 simulated variant fixtures: availability gates choices, never prices or Fit.
+test('variant groups follow meal contents',()=>{assert.deepEqual(meal('classic').variantGroups,['chicken','drink']);assert.deepEqual(meal('light').variantGroups,['drink']);assert.deepEqual(meal('single').variantGroups,['drink']);});
+test('default variants skip unavailable options',()=>{assert.deepEqual(E.defaultVariants(meal('classic'),S({})),{chicken:'Original',drink:'Pepsi'});assert.deepEqual(E.defaultVariants(meal('classic'),S({unavailableVariants:['Original','Pepsi']})),{chicken:'Spicy',drink:'7UP'});});
+test('variant validity rejects unknown, missing and unavailable choices',()=>{const s=S({unavailableVariants:['Spicy']});assert.equal(E.variantValidity(meal('classic'),{chicken:'Original',drink:'7UP'},s),null);assert.equal(E.variantValidity(meal('classic'),{chicken:'Spicy',drink:'7UP'},s),'Spicy unavailable');assert.match(E.variantValidity(meal('classic'),{chicken:'Original'},s),/Choose a drink/);assert.match(E.variantValidity(meal('classic'),{chicken:'Hot',drink:'7UP'},s),/Choose a chicken/);});
+test('meal with no available variant in a required group is invalid; others unaffected',()=>{const s=S({unavailableVariants:['Original','Spicy'],hardBudget:false});assert.equal(E.validity(meal('classic'),s),'No chicken flavor available');assert.equal(E.validity(meal('light'),s),null);assert(E.decide(s).eligible.every(x=>!x.variantGroups.includes('chicken')));});
+test('variant availability never changes price or savings',()=>{const a=E.comboQuote(meal('classic')),b=E.comboQuote(meal('classic'));assert.deepEqual(a,b);assert.equal(meal('classic').price,139000);});
+console.log(`v1.13: ${n} scenarios passed including variant fixtures.`);

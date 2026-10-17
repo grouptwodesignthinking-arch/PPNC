@@ -35,3 +35,21 @@ console.log(`${count} total kitchen and connected POS checks passed.`);
  const fixed=E.decide({...state,branch:'B'});assert.equal(K.posAdvice(fixed,[],stock,state.posLines,true,{tart:4}).cards[0].id,fixed.cards[0].id);
  console.log('PASS ready-first ranking, unavailable item exclusion, High suppression, stale and fixed-order fallback');
 }
+
+// v1.13 variant recipe mapping and ready-item holding assumption.
+{
+ assert.deepEqual(K.needs([{id:'classic',qty:1,variant:{chicken:'Spicy',drink:'7UP'}}]),{chicken:2,rice:2,drink:2,spicy:2});
+ assert.deepEqual(K.needs([{id:'classic',qty:2,variant:{chicken:'Original'}}]),{chicken:4,rice:4,drink:4});
+ assert.equal(K.needs([{id:'light',qty:1,variant:{chicken:'Spicy'}}]).spicy,2,'only meals with chicken in the recipe use marinade');
+ const t={id:'s',status:'queued',lines:[{id:'family',qty:1,variant:{chicken:'Spicy'}}]},stock={...K.stockDefaults(),chicken:20,spicy:5};
+ assert.equal(K.consume(t,stock),null,'Spicy start blocked when marinade is short (6 needed, 5 on hand)');
+ const ok=K.consume({...t,lines:[{id:'solo',qty:1,variant:{chicken:'Spicy'}}]},stock);assert.equal(ok.spicy,4);assert.equal(ok.chicken,19);
+ assert.equal(K.consume({...t,status:'preparing'},stock),null);
+ console.log('PASS variant recipe mapping deducts marinade once and blocks short Spicy starts');
+ assert.deepEqual(K.rankableReady({potato:3,tart:2},{potato:K.HOLD_LIMIT_S,tart:K.HOLD_LIMIT_S+1}),{potato:3,tart:0});
+ assert.deepEqual(K.rankableReady({potato:3},{}),{potato:3});
+ const s={...E.defaults(),channel:'pos'},stock2=Object.fromEntries(K.ingredients.map(i=>[i.id,100]));
+ const stale=K.posAdvice(E.decide(s),[],stock2,s.posLines,true,K.rankableReady({tart:4},{tart:K.HOLD_LIMIT_S+30}));
+ assert.equal(stale.cards[0].readyCount,0);
+ console.log('PASS ready portions past the hold assumption drop out of ready-first ranking');
+}
