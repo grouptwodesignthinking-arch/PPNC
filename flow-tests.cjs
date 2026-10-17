@@ -37,7 +37,13 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
     assert.equal(await ev(page, () => page), 'review');
     assert.match(await page.textContent('.custom-receipt'), /Spicy chicken · Mirinda · Take away/);
     const tickets = await ev(page, () => kitchenTickets.length);
-    await page.click('text=Confirm my choice →');
+    await page.click('text=Continue to payment →');
+    assert.equal(await ev(page, () => page), 'payment');
+    assert(await page.locator('button:has-text("Pay & place demo order"), button:has-text("Place demo order")').first().isDisabled(), 'payment method must be chosen explicitly');
+    await ev(page, () => confirmOrder());
+    assert.equal(await ev(page, () => page), 'payment', 'no order without a payment method');
+    await page.click('.pay-options button:has-text("Card (demo)")');
+    await page.click('text=Pay & place demo order →');
     await ev(page, () => confirmOrder());
     assert.equal(await ev(page, () => kitchenTickets.length), tickets + 1, 'repeated confirm creates one ticket');
     const t = await ev(page, () => kitchenTickets.at(-1));
@@ -45,6 +51,20 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
     assert.match(t.label, /Take away/);
     assert.match(await page.textContent('.order-number'), new RegExp('#' + t.id));
     assert.equal(await ev(page, () => confirmed.total), 174000);
+    assert.match(await page.textContent('.success'), /Payment: Card \(demo\) · simulated, nothing charged/);
+  });
+
+  await test('View basket on customize continues without the extra; Checkout opens payment', page, async () => {
+    await ev(page, () => { startGuided(); go('options'); choose('classic', false); });
+    await page.click('.cart-button');
+    assert.equal(await ev(page, () => page), 'review');
+    assert.equal(await ev(page, () => kioskAdded), null, 'nothing added automatically');
+    assert.match(await page.textContent('.cart-button'), /Checkout/);
+    await page.click('.cart-button');
+    assert.equal(await ev(page, () => page), 'payment');
+    await page.click('.pay-options button:has-text("Pay at the counter")');
+    await page.click('text=← Back to review');
+    assert.equal(await ev(page, () => payMethod), null, 'payment choice resets when leaving the step');
   });
 
   await test('variant becoming unavailable at review returns to customization with a notice', page, async () => {
@@ -157,7 +177,7 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
     const p2 = await browser.newPage(); const external = [];
     p2.on('request', r => { if (!/^(file|data|blob):/.test(r.url())) external.push(r.url()); });
     await p2.goto('file://' + standalone);
-    await p2.evaluate(() => { startGuided(); go('options'); choose('classic', false); kioskUpsellAct('SKIP'); confirmOrder(); });
+    await p2.evaluate(() => { startGuided(); go('options'); choose('classic', false); kioskUpsellAct('SKIP'); go('payment'); choosePayment('qr'); confirmOrder(); });
     assert.equal(await p2.evaluate(() => page), 'done');
     assert.deepEqual(external, [], 'standalone makes no external requests');
     n++; console.log('PASS standalone runs offline with no external requests');

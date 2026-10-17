@@ -499,4 +499,16 @@ Validation: compare both displays after every edit, distinguish accepted extras 
 | R01 | Advance demo past 10 min with ready potato | Potato no longer ranked as ready until Mark checked |
 | R02 | Confirm twice | One ticket; one ready-portion reservation; ingredients deducted once at Start |
 
+### Kiosk checkout and simulated payment (v1.13.1)
+- Kiosk flow is now four steps: 01 Your needs → 02 Combo + customize → 03 Review → 04 Pay.
+- **View basket** on the customization screen moves to Review without the optional extra (logged as `basket_opened_without_extra`); nothing is added. Review offers **Edit side** to reconsider. In Review the cart button reads **Checkout** and opens Pay.
+- Pay offers Pay at the counter, Card (demo) and QR e-wallet (demo). No method is preselected; the order cannot be placed until the customer picks one. Leaving the step clears the choice. No money is taken and no card or wallet details are collected.
+- **Pay & place demo order** (or **Place demo order** at the counter) is the human confirmation: validity, variants and stock are re-checked, then the demo ticket is created. The confirmation shows the payment label with "simulated, nothing charged".
+
+| ID | Setup / action | Expected outcome |
+|---|---|---|
+| K26 | Customize → View basket | Review, combo only, no extra added |
+| K27 | Review → Checkout / Continue to payment | Pay step; place-order button disabled until a method is chosen |
+| K28 | Choose Card (demo) → Pay & place demo order | Confirmation with order number and "Payment: Card (demo) · simulated, nothing charged" |
+
 Engineering QA only (logic suites and browser flow checks with synthetic fixtures). No participant, staff, kitchen or food-safety validation is claimed.

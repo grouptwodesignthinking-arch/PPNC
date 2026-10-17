@@ -130,3 +130,8 @@ Engineering checks only; no participant or live-kitchen validation.
 - Browser flow suite (`flow-tests.cjs`, Chromium via Playwright): 12 checks passed — kiosk guided flow with Spicy + Mirinda + Take away (VND 174,000, one ticket after repeated confirm, order number matches ticket); variant invalidation at review; POS ADD → keep editing → review → back → confirm with matching staff/customer totals; SKIP respected until reopened; review blocked while a suggestion is open; demo offer not re-applied silently; High removes open and accepted extras while orders continue; ready hold window and re-check; marinade deducted once; 390px no horizontal overflow; standalone file loads with no external requests.
 - Screens captured at 1366×768, 1600×1000 and 390×844 for kiosk entry/intent/options/customize/review/confirmation, POS (with and without accepted extra, workload details open), Kitchen Board and the ready-item dialog: no horizontal overflow, no console errors; Kitchen Board shows all 12 ingredient rows at 1366×768.
 - Synthetic fixtures only. No KFC recipe, holding-time, menu, discount or participant result claimed.
+
+## v1.13.1 — kiosk View basket fix and simulated payment step
+- Reproduced in the standalone file: on Customize, View basket left the page on `customize`. After the fix it opens Review with no extra; Checkout opens Pay.
+- Browser flow suite: 13 checks passed, including payment-method gating (no order without a method), payment label on confirmation, payment choice reset on leaving the step, and the standalone file placing a QR-demo order offline.
+- Pay step captured at 1100×900 and 390×844: no horizontal overflow, no console errors.

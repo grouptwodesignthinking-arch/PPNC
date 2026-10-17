@@ -2,6 +2,10 @@
 
 Policy that applies now is summarized at the top of `dist/validation.md` ("Current policy"). Detailed per-version QA notes are in `qa/QA-SUMMARY.md`.
 
+## v1.13.1 — 17 October 2026
+- Fix: **View basket** on the kiosk customization screen did nothing until the customer pressed Add/Skip. It now opens Review with the combo only (no extra added).
+- New simulated **Pay** step after Review (Pay at the counter / Card demo / QR e-wallet demo). A method must be chosen explicitly; no money is taken. Kiosk steps now read 01 Your needs → 02 Combo + customize → 03 Review → 04 Pay.
+
 ## v1.13 — 17 October 2026
 - Staff POS: ADD / SKIP keep staff in the basket; the accepted extra stays while valid; one optional extra per order; explicit "Show suggestion again" and "Remove extra"; review requires an ADD / SKIP decision while a suggestion is open; "Back to basket" keeps the extra; review button in the cart bar works whenever the basket is valid.
 - Demo discount is dropped (with a notice) when the basket stops qualifying and never re-applied automatically.
