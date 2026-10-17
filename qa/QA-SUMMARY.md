@@ -142,3 +142,7 @@ Engineering checks only; no participant or live-kitchen validation.
 - Browser flow suite: 17 checks passed, including POS needs → picks on both screens → tap to add, Snack extra, Kitchen status panel from POS and Kitchen Board with all tabs and a High preview, live clock/history advance, pause and signal loss → Safe fallback.
 - Screens at 1366×768, 1600×1000 and 390×844 (Kitchen Board, Kitchen status, POS needs and picks): no horizontal overflow, no console errors.
 - Synthetic feed only; no capacity, wait-time, utilization or participant claim.
+
+## v1.15 — larger type, portrait kiosk, larger landscape POS and Kitchen Board
+- Captured kiosk entry/intent/options/customize/review/payment, POS and Kitchen Board (+ status panel) at 1366×768, 1920×1080 and 390×844: no horizontal overflow, no console errors. Kiosk renders as a 9:16 portrait frame on desktop; Kitchen Board text ×1.45 (page height ~1000 px at 1366 wide, ~1380 px at 1920).
+- Logic, kitchen and browser flow suites re-run unchanged and passing.

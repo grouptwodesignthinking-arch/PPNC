@@ -2,6 +2,12 @@
 
 Policy that applies now is summarized at the top of `dist/validation.md` ("Current policy"). Detailed per-version QA notes are in `qa/QA-SUMMARY.md`.
 
+## v1.15 — 17 October 2026
+- Larger type everywhere. Customer Kiosk is now a portrait 9:16 kiosk screen (about 760 px wide on desktop, content scaled ×1.2) with its entry screen centred; mobile stays full width.
+- Staff POS uses the full window width in landscape and is scaled ×1.22 on screens 1200 px and wider; small labels, menu cards and kitchen-signal text enlarged; menu grid adds columns on wide screens.
+- Kitchen Board stays landscape and full width; all text ×1.45; the board grows taller than 16:9 when needed and the page scrolls instead of shrinking text.
+- Kitchen status panel text enlarged; banner reference label readable; no focus outline around the whole screen after navigation.
+
 ## v1.14 — 17 October 2026
 - Staff POS: three customer-need questions (who’s eating · order type Meal / Snack / Sharing · priority), up to three starting picks, combos orderable at the counter, intent-aware ranking of the single extra, Snack orders without a main.
 - Customer display: starting picks before a base; the undecided extra with pairing context and “Your total would be”.
