@@ -1,0 +1,11 @@
+{
+  "export_date": "2026-10-17",
+  "prototype_version": "1.12",
+  "commit": "48e6e408023a0406c119a17c232e44a066802050",
+  "sites_project_id": "appgprj_6acfc6a18a048191a8661b4fcb9a39b4",
+  "sites_saved_version": 11,
+  "source_method": "git archive HEAD; unchanged tracked files",
+  "standalone_sha256": "46a3783f431da49c3d0a63b5fc1f60f13eeb67b4efe24a9f36ab59d8ddfae4d0",
+  "prototype_changed_during_export": false,
+  "published_during_export": false
+}

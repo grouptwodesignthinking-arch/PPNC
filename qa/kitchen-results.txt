@@ -1,0 +1,21 @@
+PASS every menu fixture has explicit planning recipe
+PASS quantity-based ingredient requirements
+PASS unknown recipe never starts speculatively
+PASS starting consumes once and preserves input stock
+PASS insufficient stock rejects start without partial deduction
+PASS priority groups exclusive; stock gate overrides age
+PASS forecast arithmetic and floor at zero
+PASS stale signal suppresses every forecast, retains queue shortage
+PASS current queue reserved separately from future arrival demand
+PASS empty queue has no ingredient mix estimate
+PASS ready tickets do not reserve or forecast consumption
+11 kitchen planning tests and 90 combinations passed. Synthetic engineering QA only.
+PASS workload counts actual recipe quantities; Ready excluded
+PASS POS ranking responds to shared queue, preserves compatibility
+PASS POS reserves queued recipes and current basket before extra
+PASS fixed B order preserved; stale never ranks by workload
+PASS batch includes oldest feasible ticket, aggregate stock limits group
+PASS batch start is atomic and cannot double deduct
+PASS different or blocked components never form false batch
+18 total kitchen and connected POS checks passed.
+PASS ready-first ranking, unavailable item exclusion, High suppression, stale and fixed-order fallback
