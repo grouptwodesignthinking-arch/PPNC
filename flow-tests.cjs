@@ -167,7 +167,7 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
     await page.setViewportSize({ width: 390, height: 844 });
     await ev(page, () => { startGuided(); go('options'); choose('classic', false); });
     assert.equal(await ev(page, () => document.documentElement.scrollWidth), 390);
-    await ev(page, () => { switchChannel('pos'); posAct('ADD'); });
+    await ev(page, () => { switchChannel('pos'); changePOS('potato', 1); changePOS('tart', 1); posAct('ADD'); });
     assert.equal(await ev(page, () => document.documentElement.scrollWidth), 390);
     await page.setViewportSize({ width: 1366, height: 768 });
   });
@@ -182,7 +182,7 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
     assert.equal(await page.locator('.customer-picks > div').count(), picks.length, 'customer display shows the same picks, not added');
     assert.equal(await ev(page, () => s.posLines.length), 0, 'nothing added automatically');
     await page.click('.pos-pick.featured');
-    assert.deepEqual(await ev(page, () => s.posLines), [{ id: picks[0], qty: 1 }]);
+    assert.deepEqual(await ev(page, () => s.posLines.map(l => [l.id, l.qty])), [[picks[0], 1]]);
     assert.equal(await page.locator('.pos-pick').count(), 0, 'picks hide once the basket has a base');
     const rec = await ev(page, () => posRec(decision()));
     if (rec) {
@@ -234,6 +234,38 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
     await page.waitForTimeout(1700);
     assert.equal(await ev(page, () => E.band(s)), 'Safe fallback', 'signal loss is never read as an idle kitchen');
     await ev(page, () => { toggleSignalLoss(false); liveOn = false; });
+  });
+
+  await test('POS lines take a chicken flavor and drink; mixed lines, customer display and kitchen ticket follow', page, async () => {
+    await ev(page, () => { switchChannel('pos'); s.posLines = []; syncPOS(); changePOS('classic', 1); render(); });
+    assert.deepEqual(await ev(page, () => s.posLines[0].variant), { chicken: 'Original', drink: 'Pepsi' }, 'default variant set on add');
+    await page.click('.counter-line .variant-row button:has-text("Spicy")');
+    await page.click('.counter-line .variant-row button:has-text("Mirinda")');
+    assert.deepEqual(await ev(page, () => s.posLines[0].variant), { chicken: 'Spicy', drink: 'Mirinda' });
+    await ev(page, () => changePOS('classic', 1));
+    assert.equal(await ev(page, () => s.posLines.length), 2, 'menu adds a new Original line next to the Spicy one');
+    await ev(page, () => setLineVariant(1, 'chicken', 'Spicy'));
+    await ev(page, () => setLineVariant(1, 'drink', 'Mirinda'));
+    assert.deepEqual(await ev(page, () => s.posLines.map(l => l.qty)), [2], 'identical lines merge');
+    assert.match(await page.textContent('.customer-items'), /Spicy chicken · Mirinda/);
+    await ev(page, () => toggleVariant('Mirinda', true));
+    assert.equal(await ev(page, () => s.posLines[0].variant.drink), 'Pepsi', 'unavailable drink switched to an available one');
+    assert.match(await ev(page, () => notice), /switched/);
+    assert(await page.locator('.counter-line .variant-row button:has-text("Mirinda")').isDisabled());
+    await ev(page, () => { toggleVariant('Mirinda', false); const d = decision(); if (posRec(d)) posAct('SKIP'); posAct('REVIEW'); confirmOrder(); });
+    const t = await ev(page, () => kitchenTickets.at(-1));
+    assert.deepEqual(t.lines[0].variant, { chicken: 'Spicy', drink: 'Pepsi' });
+    assert.match(t.label, /2 × Crispy Chicken Combo \(Spicy chicken · Pepsi\)/);
+    assert.equal(await ev(page, () => KP.needs(kitchenTickets.at(-1).lines).spicy), 4, 'Spicy marinade reserved for both combos');
+  });
+
+  await test('accepted Drink Pair extra takes a drink choice', page, async () => {
+    await ev(page, () => { switchChannel('pos'); changePOS('potato', 1); changePOS('tart', 1); posAct('ADD'); });
+    assert.equal(await ev(page, () => added?.id), 'drink');
+    await page.click('.accepted-extra .variant-row button:has-text("7UP")');
+    assert.equal(await ev(page, () => added.variant.drink), '7UP');
+    await ev(page, () => { posAct('REVIEW'); confirmOrder(); });
+    assert.deepEqual(await ev(page, () => kitchenTickets.at(-1).lines.at(-1)), { id: 'drink', qty: 1, variant: { drink: '7UP' } });
   });
 
   assert.deepEqual(errors, [], 'no console errors');

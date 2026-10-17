@@ -146,3 +146,8 @@ Engineering checks only; no participant or live-kitchen validation.
 ## v1.15 — larger type, portrait kiosk, larger landscape POS and Kitchen Board
 - Captured kiosk entry/intent/options/customize/review/payment, POS and Kitchen Board (+ status panel) at 1366×768, 1920×1080 and 390×844: no horizontal overflow, no console errors. Kiosk renders as a 9:16 portrait frame on desktop; Kitchen Board text ×1.45 (page height ~1000 px at 1366 wide, ~1380 px at 1920).
 - Logic, kitchen and browser flow suites re-run unchanged and passing.
+
+## v1.16 — counter flavor and drink choices
+- Logic suite: 61 scenarios (new: counter variant groups, quote invalid with an unavailable line choice, price neutrality). Kitchen suite unchanged and passing.
+- Browser flow suite: 19 checks passed, including per-line Spicy + Mirinda, mixed then merged lines, customer display text, unavailable drink switch with notice and disabled chip, kitchen ticket variant and marinade reservation, Drink Pair extra drink choice.
+- POS basket captured at 1366×768 and 390×844 with chips on their own row: no horizontal overflow, no console errors.
