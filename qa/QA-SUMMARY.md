@@ -135,3 +135,10 @@ Engineering checks only; no participant or live-kitchen validation.
 - Reproduced in the standalone file: on Customize, View basket left the page on `customize`. After the fix it opens Review with no extra; Checkout opens Pay.
 - Browser flow suite: 13 checks passed, including payment-method gating (no order without a method), payment label on confirmation, payment choice reset on leaving the step, and the standalone file placing a QR-demo order offline.
 - Pay step captured at 1100×900 and 390×844: no horizontal overflow, no console errors.
+
+## v1.14 — counter intent, kitchen status panel, demo live feed
+- Logic suite: 59 scenarios (new: default ranking unchanged, portion fit, Best Value, Snack base, High zero upsell for every intent, starting-pick limits/validity/party match, combos at the counter) plus the existing invariant matrices.
+- Kitchen suite: existing checks plus live feed determinism, bounded steady traffic, human-confirmed tickets left for staff, single deduction on start, seeded history.
+- Browser flow suite: 17 checks passed, including POS needs → picks on both screens → tap to add, Snack extra, Kitchen status panel from POS and Kitchen Board with all tabs and a High preview, live clock/history advance, pause and signal loss → Safe fallback.
+- Screens at 1366×768, 1600×1000 and 390×844 (Kitchen Board, Kitchen status, POS needs and picks): no horizontal overflow, no console errors.
+- Synthetic feed only; no capacity, wait-time, utilization or participant claim.

@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream' }); fs.createReadStream(file).pipe(res);
 });
 let n = 0;
-async function test(name, page, fn) { await page.evaluate(() => { kitchenTickets = seedKitchen(45); ingredientStock = KP.stockDefaults(); readyExtras = { potato: 3, tart: 4, fries: 0, salad: 2 }; readyAge = { potato: 0, tart: 0, fries: 0, salad: 0 }; switchChannel('kiosk'); }); await fn(); n++; console.log('PASS ' + name); }
+async function test(name, page, fn) { await page.evaluate(() => { kitchenTickets = seedKitchen(45); ingredientStock = KP.stockDefaults(); readyExtras = { potato: 3, tart: 4, fries: 0, salad: 2 }; readyAge = { potato: 0, tart: 0, fries: 0, salad: 0 }; liveOn = false; feedLost = false; statusOpen = false; switchChannel('kiosk'); }); await fn(); n++; console.log('PASS ' + name); }
 const ev = (page, fn, arg) => page.evaluate(fn, arg);
 
 (async () => {
@@ -22,6 +22,7 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(url);
+  await page.evaluate(() => { liveOn = false; });
 
   await test('kiosk guided flow keeps 3+1, variants, order mode and ticket number', page, async () => {
     await page.click('text=Help me choose >> nth=0');
@@ -171,12 +172,77 @@ const ev = (page, fn, arg) => page.evaluate(fn, arg);
     await page.setViewportSize({ width: 1366, height: 768 });
   });
 
+  await test('POS customer needs drive up to three starting picks and the customer display', page, async () => {
+    await ev(page, () => { switchChannel('pos'); s.posLines = []; syncPOS(); render(); });
+    await page.click('.pos-intent button:has-text("Sharing")');
+    await page.click('.pos-intent button:has-text("Four")');
+    const picks = await ev(page, () => E.posPicks(s).map(x => x.id));
+    assert(picks.length >= 1 && picks.length <= 3);
+    assert.equal(await page.locator('.pos-pick').count(), picks.length);
+    assert.equal(await page.locator('.customer-picks > div').count(), picks.length, 'customer display shows the same picks, not added');
+    assert.equal(await ev(page, () => s.posLines.length), 0, 'nothing added automatically');
+    await page.click('.pos-pick.featured');
+    assert.deepEqual(await ev(page, () => s.posLines), [{ id: picks[0], qty: 1 }]);
+    assert.equal(await page.locator('.pos-pick').count(), 0, 'picks hide once the basket has a base');
+    const rec = await ev(page, () => posRec(decision()));
+    if (rec) {
+      assert.match(await page.textContent('.customer-suggestion'), /Your total would be/);
+      assert.match(await page.textContent('.customer-suggestion'), /Goes well with your/);
+    }
+  });
+
+  await test('snack order: fries alone can get one extra; intent change is logged', page, async () => {
+    await ev(page, () => { switchChannel('pos'); s.posLines = []; syncPOS(); setPOSIntent('orderType', 'snack'); changePOS('fries', 1); });
+    const d = await ev(page, () => decision().cards.map(x => x.category));
+    assert.equal(d.length, 1);
+    assert.notEqual(d[0], 'side');
+    assert(await ev(page, () => events.some(e => e.event === 'pos_intent_changed' && e.value === 'snack')));
+  });
+
+  await test('kitchen status panel opens from POS and Kitchen Board with all tabs', page, async () => {
+    await ev(page, () => switchChannel('pos'));
+    await page.click('text=Manage kitchen status →');
+    assert(await page.locator('#opsPanel[open]').isVisible());
+    for (const tab of ['Kitchen', 'Suggestions', 'Reports', 'Settings', 'Overview']) await page.click(`#opsPanel .ops-nav button:has-text("${tab}")`);
+    assert.equal(await page.locator('#opsPanel .ops-trend').count(), 1);
+    const text = await page.textContent('#opsPanel');
+    assert(!/utili[sz]ation\s*\d|%\s*capacity|\bLIVE\b(?! ×)/.test(text.replace('DEMO LIVE', '')), 'no utilization, capacity or unlabelled live claim');
+    await page.click('#opsPanel .ops-gate button:has-text("High")');
+    assert.equal(await ev(page, () => E.band(s)), 'High');
+    assert.equal(await ev(page, () => decision().cards.length), 0, 'High preview suppresses upsell');
+    await page.click('#opsPanel .ops-close');
+    assert.equal(await page.locator('#opsPanel').count(), 0);
+    await ev(page, () => { setBand('Normal'); switchChannel('kitchen'); });
+    await page.click('text=Kitchen status ◉');
+    assert(await page.locator('#opsPanel[open]').isVisible());
+    await ev(page, () => closeStatus());
+  });
+
+  await test('live demo feed advances the clock, history and tickets, and pauses on request', page, async () => {
+    await ev(page, () => { switchChannel('kitchen'); liveOn = true; });
+    const before = await ev(page, () => ({ clock: feed.clock, n: feed.history.length, last: feed.history.at(-1).clock }));
+    await page.waitForTimeout(3300);
+    const after = await ev(page, () => ({ clock: feed.clock, last: feed.history.at(-1).clock, fresh: s.freshness }));
+    assert(after.clock >= before.clock + 30, 'demo clock advanced');
+    assert(after.last > before.last, 'trend history extended');
+    assert.equal(after.fresh, 0, 'fresh feed keeps the signal current');
+    await page.click('text=❚❚ Pause live demo');
+    const paused = await ev(page, () => feed.clock);
+    await page.waitForTimeout(1700);
+    assert.equal(await ev(page, () => feed.clock), paused);
+    await ev(page, () => { liveOn = true; toggleSignalLoss(true); });
+    await page.waitForTimeout(1700);
+    assert.equal(await ev(page, () => E.band(s)), 'Safe fallback', 'signal loss is never read as an idle kitchen');
+    await ev(page, () => { toggleSignalLoss(false); liveOn = false; });
+  });
+
   assert.deepEqual(errors, [], 'no console errors');
   const standalone = path.join(dist, 'ComboFlow-standalone.html');
   if (fs.existsSync(standalone)) {
     const p2 = await browser.newPage(); const external = [];
     p2.on('request', r => { if (!/^(file|data|blob):/.test(r.url())) external.push(r.url()); });
     await p2.goto('file://' + standalone);
+    await p2.evaluate(() => { liveOn = false; });
     await p2.evaluate(() => { startGuided(); go('options'); choose('classic', false); kioskUpsellAct('SKIP'); go('payment'); choosePayment('qr'); confirmOrder(); });
     assert.equal(await p2.evaluate(() => page), 'done');
     assert.deepEqual(external, [], 'standalone makes no external requests');

@@ -53,3 +53,16 @@ console.log(`${count} total kitchen and connected POS checks passed.`);
  assert.equal(stale.cards[0].readyCount,0);
  console.log('PASS ready portions past the hold assumption drop out of ready-first ranking');
 }
+
+// v1.14 live demo feed: deterministic, bounded, crew handles only background tickets, deductions once.
+{
+ const run=(o,ticks,tk=[],st=K.stockDefaults())=>{let w=K.liveWorld(o);for(let i=0;i<ticks;i++){const r=K.liveStep(w,tk,st);w=r.world;tk=r.tickets;st=r.stock;}return {w,tk,st};};
+ const a=run({},120),b=run({},120);assert.deepEqual(a.w.history,b.w.history,'seeded feed is deterministic');
+ assert(a.w.history.length===120&&a.w.history.every(h=>h.open>=0&&h.age>=0));
+ assert(run({},480).w.history.filter(h=>h.age>=120).length<40,'steady arrivals stay mostly below High');
+ const human={id:'H1',age:0,status:'queued',channel:'Kiosk',label:'demo',lines:[{id:'solo',qty:1}],fixture:false};
+ const r=run({},40,[human]);const h=r.tk.find(t=>t.id==='H1');assert.equal(h.status,'queued','confirmed demo orders wait for a human Start');assert.equal(h.age,600);
+ const one={id:'B1',age:0,status:'queued',lines:[{id:'solo',qty:1}],fixture:true},s0={...K.stockDefaults()};const s1=K.liveStep(K.liveWorld({arrivalRate:0,deliveryEvery:1e9}),[one],s0);assert.equal(s1.tickets[0].status,'preparing');assert.equal(s1.stock.chicken,s0.chicken-1);const s2=K.liveStep(s1.world,s1.tickets,s1.stock);assert.equal(s2.stock.chicken,s1.stock.chicken,'no second deduction while preparing');
+ const seeded=K.seedHistory(K.liveWorld());assert.equal(seeded.history.length,240);assert.equal(seeded.clock,0);assert.equal(seeded.seq,200);
+ console.log('PASS live demo feed is deterministic, bounded, human orders stay manual, single deduction');
+}

@@ -13,7 +13,7 @@ python3 build-delivery.py            # rebuilds dist/validation.html, dist/Combo
 NODE_PATH=$(npm root -g) node flow-tests.cjs   # browser flows; needs Playwright + Chromium
 ```
 
-Current version: **v1.13** (see `CHANGELOG.md`). The Claude handoff guide for v1.12 is in `docs/handoff-v1.12/`.
+Current version: **v1.14** (see `CHANGELOG.md`). The Claude handoff guide for v1.12 is in `docs/handoff-v1.12/`.
 
 Source: v5 attached to “Chấm bài Future CEO” plus the user's current requirements and v5 critique. Original project Working Canon/Training files were not present in the local mirror; scope and source limits are documented in the validation kit.
 

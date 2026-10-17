@@ -22,7 +22,7 @@ body=''.join(out)
 actions='<div class="actions"><a class="btn red" href="test-log-template.csv" download>Download blank test log ↓</a><a class="btn white" href="validation.md" download>Documentation Markdown ↓</a></div>'
 (p/'validation.html').write_text('<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ComboFlow — Validation kit</title><link rel="stylesheet" href="style.css"></head><body><main class="doc"><a href="index.html">← Back to prototype</a>'+actions+body+'</main></body></html>')
 standalone=(p/'index.html').read_text();standalone=re.sub(r'<link rel="stylesheet" href="style.css[^\"]*">','<style>'+(p/'style.css').read_text()+'</style>',standalone)
-for name in ['engine','kitchen','app']:
+for name in ['engine','kitchen','app','ops']:
  standalone=re.sub(r'<script src="'+name+r'.js[^\"]*"></script>',lambda m:'<script>'+(p/(name+'.js')).read_text()+'</script>',standalone)
 standalone=standalone.replace('href="validation.html" target="_blank"','href="#validation" onclick="document.getElementById(\'guide\').showModal();return false"')
 dialog='<dialog id="guide" style="max-width:1000px;width:95vw;height:90vh;border:1px solid #ddd;border-radius:12px"><button class="btn red" onclick="document.getElementById(\'guide\').close()" style="position:sticky;top:0">Close validation kit ×</button><div class="doc">'+actions+body+'</div></dialog>'

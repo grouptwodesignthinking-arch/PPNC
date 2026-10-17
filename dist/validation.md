@@ -1,15 +1,17 @@
 # ComboFlow — Validation Kit
 
-Version 1.13 · 17 October 2026 · English-only prototype · visual choices, editable counter and Kitchen Board
+Version 1.14 · 17 October 2026 · English-only prototype · visual choices, editable counter and Kitchen Board
 
-## Current policy (v1.13) — read this first
+## Current policy (v1.14) — read this first
 
-This kit keeps its version history. Where an earlier section conflicts with the list below, the list below and sections 21–22 apply. Rows marked **[Superseded]** are kept only for traceability.
+This kit keeps its version history. Where an earlier section conflicts with the list below, the list below and sections 21–23 apply. Rows marked **[Superseded]** are kept only for traceability.
 
 - Pipeline: Rules → Contextual Ranking → Load Gate → Human Decision. At most three combo suggestions plus one optional add-on per order; the full menu is a separate manual path.
 - **High suppresses every upsell** in kiosk and POS, including ready items and Rules-only branch B. Main-meal ordering continues when valid; kiosk main-meal recommendations at High remain limited to Ready / Short preparation classes.
 - Stale signal or ranking outage → Safe fallback: no workload or ready ranking, no Fastest to Serve; POS shows fixed valid rules with a staff check; kiosk extras pause. Stale is never read as an idle kitchen.
 - ADD / SKIP and review / confirm are always human actions. Nothing is added, discounted or confirmed silently. In POS, ADD and SKIP keep staff in the basket (section 22); review is a separate explicit step.
+- Staff POS asks three optional customer-need questions (who’s eating · order type Meal / Snack / Sharing · priority). They order eligible items and up to three starting picks; they never bypass validity, stock, the Load Gate or human ADD / SKIP (section 23).
+- The Kitchen Board and Staff POS run a seeded **demo live feed** (demo clock ×10). It is synthetic traffic, labelled DEMO LIVE, and can be paused; signal loss always means Safe fallback.
 - No margin, internal Fit score or kitchen utilization is shown. Business Value is omitted without contribution data.
 - Menu, prices, portions, variants, recipes and holding windows are synthetic **[Verify KFC VN menu]** / **[Assumption]**. No user-test, revenue, waste, payback, live-integration or prediction-accuracy result is claimed.
 
@@ -512,3 +514,36 @@ Validation: compare both displays after every edit, distinguish accepted extras 
 | K28 | Choose Card (demo) → Pay & place demo order | Confirmation with order number and "Payment: Card (demo) · simulated, nothing charged" |
 
 Engineering QA only (logic suites and browser flow checks with synthetic fixtures). No participant, staff, kitchen or food-safety validation is claimed.
+
+
+## 23. Counter order intent, kitchen status panel and demo live feed (v1.14)
+
+### Staff POS: three customer-need questions
+- **1 · Who’s eating?** Just one / Two / Four. **2 · Order type?** Meal / Snack / Sharing (replaces the kiosk budget question at the counter). **3 · Priority?** Fastest / Best Fit / Best Value. Defaults: Two · Meal · Best Fit, which reproduce the v1.13 ranking.
+- Before the basket has a base, up to **three starting picks** appear (Meal / Sharing: combos from the kiosk decision table for the party size, sharing uses at least two people; Snack: Light Meal and non-drink sides / desserts). Staff tap a pick to add it; nothing is added automatically. Picks disappear once the basket has a base, so the order still shows at most 3 picks + 1 extra.
+- Combos are now orderable at the counter (new Combos filter); their included categories count as already in the basket, so an included drink is never suggested again.
+- After a base exists, the single extra is ranked by: portion fit (Sharing or four people → two-portion extras; one person → single portions) → Best Value price → checked ready items → Fastest service class → station workload → shared prep → service class → price. A Snack order can receive one extra without a main; Meal and Sharing still need a main or combo.
+- The displayed extra stays stable while it remains eligible for the same basket and needs, so the live feed cannot reshuffle it mid-conversation.
+
+### Customer display
+- Before a base: the same up-to-three picks, marked **NOT ADDED**. After a base: the one undecided extra with “Goes well with your …”, “Just VND … more” and “Your total would be VND …” computed from the current basket and any applied demo discount. Accepted extras, totals and discounts update after every staff action. No kitchen, stock or ranking internals are shown.
+
+### Kitchen status panel (Kitchen Board and Staff POS)
+- Left navigation: Overview · Kitchen · Suggestions · Reports · Settings. Right column: **Load Gate setup** (Normal / Elevated / High / Safe fallback previews with their policy).
+- Overview: status (Kitchen steady / busy / High / Signal unavailable), orders preparing, open tickets, median waiting-ticket age, arrivals in the last 10 demo minutes, and a 60-minute trend of open tickets and median age with the 90 s / 120 s band lines. Kitchen: station recipe-unit workload, ingredients to watch, ready items. Suggestions and Reports: counts from this browser’s event log only. Settings: pause / resume, arrivals, demo crew slots, simulated signal loss, refresh, reset.
+- Deliberately absent: utilization or capacity percentages, estimated customer wait times and an unlabelled “LIVE” claim from the reference storyboard.
+
+### Demo live feed
+- While Staff POS or Kitchen Board is open, the demo clock advances 15 demo seconds every 1.5 s (×10). Arrivals follow a seeded 30-minute wave around the chosen arrivals/min; a simulated crew starts and finishes **background** tickets only (up to the crew slots, +1/+2 when the queue grows); confirmed demo orders still need a human Start / Mark ready. Scheduled deliveries every 2 demo minutes restore stock. Starting a ticket deducts ingredients once.
+- Each tick refreshes the signal and recomputes the median waiting-ticket age, High persistence and recovery. Band changes re-check open suggestions and are logged (`kitchen_band_changed`). Simulated signal loss stops refreshing, so the signal goes stale and Safe fallback applies.
+- The Kitchen Board chart shows the last 60 demo minutes (1-minute averages) and the existing 15-minute what-if projection. A synthetic 60-minute lead-in fills the chart at start. All [Assumption]; not a capacity model, forecast accuracy or wait promise.
+
+| ID | Setup / action | Expected outcome |
+|---|---|---|
+| P14 | POS empty basket → Sharing, Four | Up to three four-person picks on staff and customer screens; none added |
+| P15 | Tap the featured pick | One line added; picks hidden; one extra suggested with would-be total |
+| P16 | Snack → Golden Fries | One extra that is not another side |
+| P17 | Any intent at High | No extra; picks limited to Ready / Short meals |
+| S01 | Open Kitchen status from POS and Kitchen Board | Same panel; Load Gate previews change the band for both |
+| S02 | Live demo running 3 s | Demo clock +30 s, trend extended, signal age 0 |
+| S03 | Pause / simulate signal loss | Clock stops / Safe fallback, no workload ranking |

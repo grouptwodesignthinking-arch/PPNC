@@ -24,7 +24,7 @@ function posAdvice(base,tickets,stock,basket,fresh=true,readyExtras={}){
  const loads=workload(tickets),reserved=needs(tickets.filter(t=>t.status==='queued').flatMap(t=>t.lines)),basketNeeds=needs(basket);
  if(base.band==='High')return {...base,loads,queueAware:false,stockRejected:[],eligible:[],cards:[]};
  if(!fresh)return {...base,loads,queueAware:false,stockRejected:[]};
- const stockRejected=[];const eligible=base.eligible.map(item=>{const req=needs([{id:item.id,qty:1}]),short=!req||!reserved||!basketNeeds||Object.entries({...basketNeeds,...req}).some(([id])=>(stock[id]||0)-(reserved?.[id]||0)-(basketNeeds?.[id]||0)-(req?.[id]||0)<0);if(short){stockRejected.push(item.id);return null;}const touched=loads.filter(st=>st.keys.some(id=>req[id]));const pressure=Math.max(0,...touched.map(st=>st.total));const readyCount=Math.max(0,(readyExtras[item.id]||0)-basket.filter(l=>l.id===item.id).reduce((n,l)=>n+l.qty,0)),prepMatch=tickets.filter(t=>t.status==='preparing'&&t.lines.some(l=>Object.keys(needs([l])||{}).some(id=>req[id]&&id!=='drink'))).length;return {...item,pressure,readyCount,prepMatch,stationNames:touched.map(st=>st.name),workUnits:Object.values(req).reduce((a,q)=>a+q,0)};}).filter(Boolean);if(!base.fixed)eligible.sort((a,b)=>Number(b.readyCount>0)-Number(a.readyCount>0)||a.pressure-b.pressure||b.prepMatch-a.prepMatch||a.service-b.service||a.price-b.price);
+ const stockRejected=[];const eligible=base.eligible.map(item=>{const req=needs([{id:item.id,qty:1}]),short=!req||!reserved||!basketNeeds||Object.entries({...basketNeeds,...req}).some(([id])=>(stock[id]||0)-(reserved?.[id]||0)-(basketNeeds?.[id]||0)-(req?.[id]||0)<0);if(short){stockRejected.push(item.id);return null;}const touched=loads.filter(st=>st.keys.some(id=>req[id]));const pressure=Math.max(0,...touched.map(st=>st.total));const readyCount=Math.max(0,(readyExtras[item.id]||0)-basket.filter(l=>l.id===item.id).reduce((n,l)=>n+l.qty,0)),prepMatch=tickets.filter(t=>t.status==='preparing'&&t.lines.some(l=>Object.keys(needs([l])||{}).some(id=>req[id]&&id!=='drink'))).length;return {...item,pressure,readyCount,prepMatch,stationNames:touched.map(st=>st.name),workUnits:Object.values(req).reduce((a,q)=>a+q,0)};}).filter(Boolean);const it=base.intent||{},pf=x=>(it.orderType==='sharing'||it.party>=4)?(x.share?0:1):it.party===1?(x.share?1:0):0;if(!base.fixed)eligible.sort((a,b)=>pf(a)-pf(b)||(it.priority==='value'?a.price-b.price:0)||Number(b.readyCount>0)-Number(a.readyCount>0)||(it.priority==='fast'?a.service-b.service:0)||a.pressure-b.pressure||b.prepMatch-a.prepMatch||a.service-b.service||a.price-b.price);
  return {...base,loads,queueAware:!base.fixed,stockRejected,eligible,cards:eligible.slice(0,1).map(x=>({...x,label:'Kitchen-aware suggestion'}))};
 }
 function batchSuggestions(tickets,stock,fresh=true){
@@ -40,5 +40,28 @@ function startBatch(tickets,stock,proposal,fresh=true){
 // Ready portions past the documented holding assumption need a staff re-check before ready-first ranking. [Assumption], not a food-safety rule.
 const HOLD_LIMIT_S=600;
 function rankableReady(ready,ages,limit=HOLD_LIMIT_S){return Object.fromEntries(Object.entries(ready||{}).map(([id,n])=>[id,(ages?.[id]||0)<=limit?n:0]));}
-const api={HOLD_LIMIT_S,rankableReady,ingredients,recipes,stockDefaults,needs,shortage,station,consume,plan,stations,workload,posAdvice,batchSuggestions,startBatch};root.KitchenPlanner=api;if(typeof module!=='undefined')module.exports=api;
+// v1.14 live demo feed. Deterministic synthetic traffic: seeded arrivals on a 30-minute wave, a simulated crew that
+// starts and finishes background tickets only, scheduled deliveries. Demo clock only; not a capacity or wait model.
+const liveMenu=[['riceMain',2,'2 × Chicken Rice'],['classic',1,'Crispy Chicken Combo'],['light',1,'Burger Combo'],['ready',1,'Chicken Rice Combo'],['solo',1,'Solo Combo'],['rice1',1,'Chicken Rice Solo'],['burger1',1,'Burger Solo'],['bucket2',1,'Crispy Duo Bucket'],['pasta1',1,'Pasta Solo'],['chickenMain',3,'3 × Crispy Chicken']];
+function rng(seed){let a=seed>>>0;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function median(xs){const a=[...xs].sort((x,y)=>x-y),n=a.length;return n?Math.round(n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2):0;}
+function liveWorld(o={}){return {clock:0,seq:200,seed:7,arrivalAcc:0,arrivalRate:1.2,crewSlots:3,prepSeconds:70,deliveryEvery:120,deliveryFloor:12,history:[],...o};}
+function liveStep(world,tickets,stock,dt=15){
+ const w={...world},events=[];let list=tickets.map(t=>({...t})),inv={...stock};const r=rng(w.seed+w.clock);
+ w.clock+=dt;
+ for(const t of list)if(t.status!=='ready'){t.age+=dt;if(t.status==='preparing')t.prep=(t.prep??Math.max(0,t.age-dt))+dt;}
+ const rate=w.arrivalRate*(1+.6*Math.sin(2*Math.PI*w.clock/1800));w.arrivalAcc+=rate*dt/60;let arrived=0;
+ while(w.arrivalAcc>=1){w.arrivalAcc-=1;const [id,qty,label]=liveMenu[Math.floor(r()*liveMenu.length)];const ch=['Counter','Kiosk','Delivery'][Math.floor(r()*3)];list.push({id:'D'+(++w.seq),age:Math.floor(r()*dt),status:'queued',channel:ch,label,lines:[{id,qty}],fixture:true,live:true});arrived++;events.push({type:'arrival',id:'D'+w.seq});}
+ for(const t of list)if(t.fixture&&t.status==='preparing'&&(t.prep||0)>=w.prepSeconds){t.status='ready';t.readyAt=w.clock;events.push({type:'ready',id:t.id});}
+ let busy=list.filter(t=>t.fixture&&t.status==='preparing').length;const queuedNow=list.filter(t=>t.fixture&&t.status==='queued').length,slots=w.crewSlots+(queuedNow>6?2:queuedNow>3?1:0);
+ for(const t of [...list].filter(t=>t.fixture&&t.status==='queued').sort((a,b)=>(b.teamPriority||0)-(a.teamPriority||0)||b.age-a.age)){if(busy>=slots)break;const after=consume(t,inv);if(!after)continue;inv=after;t.status='preparing';t.prep=0;busy++;events.push({type:'start',id:t.id});}
+ if(Math.floor(w.clock/w.deliveryEvery)>Math.floor((w.clock-dt)/w.deliveryEvery)){const got={};for(const i of ingredients){const target=Math.max(i.start,w.deliveryFloor);if((inv[i.id]||0)<target){got[i.id]=target-(inv[i.id]||0);inv[i.id]=target;}}if(Object.keys(got).length)events.push({type:'delivery',got});}
+ const ready=list.filter(t=>t.status==='ready').sort((a,b)=>(b.readyAt||0)-(a.readyAt||0));const drop=new Set(ready.slice(8).filter(t=>t.fixture).map(t=>t.id));list=list.filter(t=>!drop.has(t.id));
+ const open=list.filter(t=>t.status!=='ready');
+ w.history=[...w.history,{clock:w.clock,open:open.length,age:median(open.map(t=>t.age)),arrived}].slice(-240);
+ return {world:w,tickets:list,stock:inv,events};
+}
+// Synthetic 60-minute lead-in so the trend chart has history at start. Uses its own scratch tickets and stock.
+function seedHistory(world,minutes=60){let w={...world,clock:-minutes*60,history:[]},tk=[],st=stockDefaults();for(let i=0;i<minutes*4;i++){const r=liveStep(w,tk,st,15);w=r.world;tk=r.tickets;st=r.stock;}return {...world,history:w.history};}
+const api={liveWorld,liveStep,seedHistory,HOLD_LIMIT_S,rankableReady,ingredients,recipes,stockDefaults,needs,shortage,station,consume,plan,stations,workload,posAdvice,batchSuggestions,startBatch};root.KitchenPlanner=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

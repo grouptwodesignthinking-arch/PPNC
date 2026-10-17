@@ -2,6 +2,13 @@
 
 Policy that applies now is summarized at the top of `dist/validation.md` ("Current policy"). Detailed per-version QA notes are in `qa/QA-SUMMARY.md`.
 
+## v1.14 — 17 October 2026
+- Staff POS: three customer-need questions (who’s eating · order type Meal / Snack / Sharing · priority), up to three starting picks, combos orderable at the counter, intent-aware ranking of the single extra, Snack orders without a main.
+- Customer display: starting picks before a base; the undecided extra with pairing context and “Your total would be”.
+- Kitchen status panel (Overview · Kitchen · Suggestions · Reports · Settings + Load Gate setup) on Kitchen Board and Staff POS.
+- Demo live feed: seeded arrivals, simulated crew for background tickets, scheduled deliveries, ×10 demo clock, pause / signal-loss controls; Kitchen Board chart shows the last 60 demo minutes plus the 15-minute projection.
+- The shown POS extra stays stable while eligible; clearer message when ingredient checks block every extra.
+
 ## v1.13.1 — 17 October 2026
 - Fix: **View basket** on the kiosk customization screen did nothing until the customer pressed Add/Skip. It now opens Review with the combo only (no extra added).
 - New simulated **Pay** step after Review (Pay at the counter / Card demo / QR e-wallet demo). A method must be chosen explicitly; no money is taken. Kiosk steps now read 01 Your needs → 02 Combo + customize → 03 Review → 04 Pay.
